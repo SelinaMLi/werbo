@@ -4,7 +4,7 @@ import logo from "./logo.svg";
 import "./App.css";
 
 import HomePage from "./components/pages/HomePage";
-import ViewCourt from "./components/pages/ViewCourt";
+import JoinCourt from "./components/pages/JoinCourt";
 
 class App extends Component {
   state = {
@@ -15,7 +15,7 @@ class App extends Component {
     return (
       <div className="App">
         <Route path="/" exact component={HomePage} />
-        <Route path="/court" exact component={ViewCourt} />
+        <Route path="/court" exact component={JoinCourt} />
       </div>
     );
   }

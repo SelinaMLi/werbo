@@ -28,21 +28,25 @@ app.get("/", (req, res) => {
 	res.send("go to /courts to see courts");
 });
 
-app.get("/courts", (req, res) => {
-	connection.query(SELECT_ALL_COURTS_QUERY, (err, results) => {
-		if (err) {
-			return res.send(err);
-		} else {
-			return res.json({
-				data: results
-			});
-		}
-	});
+app.get("/join", (req, res) => {
+	const { access_code } = req.query;
+	console.log(access_code);
+
+	// connection.query(SELECT_ALL_COURTS_QUERY, (err, results) => {
+	// 	if (err) {
+	// 		return res.send(err);
+	// 	} else {
+	// 		return res.json({
+	// 			data: results
+	// 		});
+	// 	}
+	// });
 });
 
 app.get("/courts/new", (req, res) => {
 	newCourt().then(result => {
-		res.send(result);
+		console.log(result);
+		return res.json({ code: result });
 	});
 });
 
@@ -86,13 +90,13 @@ async function generateAccessCode() {
 			}
 		} while (hasDupe);
 
-		console.log(code);
 		return code;
 	} catch (e) {
 		throw e;
 	}
 }
 
+//TODO- make sure error message returns when database is capped
 function insertCourt(code) {
 	return new Promise((resolve, reject) => {
 		const INSERT_COURTS_QUERY = `INSERT INTO courts (access_code,team1,team2) VALUES ('${code}', 0, 0)`;
@@ -101,7 +105,7 @@ function insertCourt(code) {
 			if (err) {
 				reject(err);
 			} else {
-				resolve("successfully added court " + code);
+				resolve(code);
 			}
 		});
 	});
