@@ -13,18 +13,23 @@ class HomePage extends Component {
 	};
 
 	createCourt = () => {
+		// fetch("http://localhost:4000/courts/new").catch(err =>
+		// 	console.error(err)
+		// );
 		fetch("http://localhost:4000/courts/new")
 			.catch(err => console.error(err))
 			.then(
-				response => response.json()
+				response => {
+					console.log(response);
+					response.json();
+				}
 				//this.setState({ code: response });
 			)
 			.then(response => {
 				console.log(response.code);
 				this.setState({ code: response.code });
 				this.setState({ redirect: true });
-			})
-			.catch(err => console.error(err));
+			});
 
 		// fetch("http://localhost:4000/courts")
 		// 	.then(response => response.json())
@@ -63,8 +68,7 @@ class HomePage extends Component {
 						</label>
 						<Link
 							to={{
-								pathname: "/court",
-								code: this.state.code
+								pathname: "/join/" + this.state.code
 							}}
 						>
 							<input type="submit" value="submit" />

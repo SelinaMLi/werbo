@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
-import logo from "./logo.svg";
-import "./App.css";
 
 import HomePage from "./components/pages/HomePage";
-import JoinCourt from "./components/pages/JoinCourt";
+import Court from "./components/pages/Court";
 
 class App extends Component {
   state = {
@@ -14,8 +12,8 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Route path="/" exact component={HomePage} />
-        <Route path="/court" exact component={JoinCourt} />
+        <Route exact path="/" component={HomePage} />
+        <Route path="/join/:access_code" component={Court} />
       </div>
     );
   }

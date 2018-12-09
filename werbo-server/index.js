@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql");
@@ -8,45 +9,54 @@ const SELECT_ALL_COURTS_QUERY = "SELECT * FROM courts";
 const GET_ALL_CODES = "SELECT access_code FROM courts";
 const FIND_EXISITNG_COURT =
 	"SELECT access_code,team1,team2 FROM courts WHERE access_code= ?";
+const UPDATE_EXISTING_COURT = "";
 
 const connection = mysql.createConnection({
-	host: "localhost",
-	user: "root",
-	password: "password",
+	host: process.env.DB_HOST,
+	user: process.env.DB_USER,
+	password: process.env.DB_PASS,
 	database: "werbo"
 });
 
 connection.connect(err => {
 	if (err) {
+		console.log(err);
 		return err;
 	}
+	console.log("connected!");
 });
 
 app.use(cors());
+app.use(express.json());
 
-app.get("/", (req, res) => {
-	res.send("go to /courts to see courts");
+app.get("/court/:access_code", (req, res) => {
+	console.log(req.params.access_code);
+
+	connection.query(
+		FIND_EXISITNG_COURT,
+		req.params.access_code,
+		(err, results) => {
+			if (err) {
+				return res.send(err);
+			} else {
+				console.log(results);
+				return res.json({
+					data: results
+				});
+			}
+		}
+	);
 });
 
-app.get("/join", (req, res) => {
-	const { access_code } = req.query;
-	console.log(access_code);
-
-	// connection.query(SELECT_ALL_COURTS_QUERY, (err, results) => {
-	// 	if (err) {
-	// 		return res.send(err);
-	// 	} else {
-	// 		return res.json({
-	// 			data: results
-	// 		});
-	// 	}
-	// });
+app.post("/court/update", (req, res) => {
+	console.log(req.body);
+	res.end();
 });
 
 app.get("/courts/new", (req, res) => {
 	newCourt().then(result => {
 		console.log(result);
-		return res.json({ code: result });
+		res.send(result);
 	});
 });
 
@@ -115,3 +125,17 @@ async function newCourt() {
 	code = await generateAccessCode();
 	return await insertCourt(code);
 }
+
+// app.get("/courts", (req, res) => {
+// 	connection.query(SELECT_ALL_COURTS_QUERY, (err, results) => {
+// 		if (err) {
+// 			return res.send(err);
+// 		} else {
+// 			console.log(results);
+// 			res.send(results);
+// 			// return res.json({
+// 			// 	data: results
+// 			// });
+// 		}
+// 	});
+// });
