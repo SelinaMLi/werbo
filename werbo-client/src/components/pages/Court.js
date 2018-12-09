@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 
 class Court extends Component {
-	state = {
-		access_code: "",
-		team1_score: 0,
-		team2_score: 0
-	};
+	constructor(props) {
+		super(props);
+		this.state = {
+			access_code: "",
+			team1_score: 0,
+			team2_score: 0
+		};
+	}
 
-	componentDidMount() {
+	componentWillMount() {
 		this.setState({ access_code: this.props.match.params.access_code });
 		this.getCourtInfo();
 	}
@@ -22,17 +25,17 @@ class Court extends Component {
 			})
 			.then(results => {
 				this.setState({ team1_score: results.data[0].team1 });
-				this.setState({ team1_score: results.data[0].team2 });
+				this.setState({ team2_score: results.data[0].team2 });
 			});
 	};
 
-	updateScore = team => {
+	updateScore = (team, operation) => {
 		fetch("http://localhost:4000/court/update", {
 			method: "POST",
 			body: JSON.stringify({
 				access_code: this.state.access_code,
 				team_number: team,
-				operation: "increase"
+				operation: operation
 			}),
 			headers: { "Content-Type": "application/json" }
 		});
@@ -44,10 +47,21 @@ class Court extends Component {
 				<h1> Court </h1>
 				<div>
 					<p> Team 1: {this.state.team1_score}</p>
-					<button onClick={() => this.updateScore(1)}>Update</button>
+					<button onClick={() => this.updateScore(1, "increase")}>
+						+
+					</button>
+					<button onClick={() => this.updateScore(1, "decrease")}>
+						-
+					</button>
 				</div>
 				<div>
 					<p> Team 2: {this.state.team2_score}</p>
+					<button onClick={() => this.updateScore(2, "increase")}>
+						+
+					</button>
+					<button onClick={() => this.updateScore(2, "decrease")}>
+						-
+					</button>
 				</div>
 			</div>
 		);

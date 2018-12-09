@@ -5,11 +5,17 @@ const mysql = require("mysql");
 
 const app = express();
 
+const io = require("socket.io");
+const http = require("http").Server(app);
+
 const SELECT_ALL_COURTS_QUERY = "SELECT * FROM courts";
 const GET_ALL_CODES = "SELECT access_code FROM courts";
 const FIND_EXISITNG_COURT =
 	"SELECT access_code,team1,team2 FROM courts WHERE access_code= ?";
-const UPDATE_EXISTING_COURT = "";
+const INCREMENT_EXISTING_COURT =
+	"UPDATE courts SET team? = team? + 1 WHERE access_code = ?";
+const DECREMENT_EXISTING_COURT =
+	"UPDATE courts SET team? = team? - 1 WHERE access_code = ?";
 
 const connection = mysql.createConnection({
 	host: process.env.DB_HOST,
@@ -48,8 +54,36 @@ app.get("/court/:access_code", (req, res) => {
 	);
 });
 
+//operation: increase/decrease/resetAll
 app.post("/court/update", (req, res) => {
-	console.log(req.body);
+	var fields = [
+		req.body.team_number,
+		req.body.team_number,
+		req.body.access_code
+	];
+
+	if (req.body.operation === "increase") {
+		connection.query(INCREMENT_EXISTING_COURT, fields, (err, results) => {
+			if (err) {
+				console.log(err);
+				res.end();
+			} else {
+				console.log("added 1 to team" + fields[0]);
+				res.end();
+			}
+		});
+	}
+	if (req.body.operation === "decrease") {
+		connection.query(DECREMENT_EXISTING_COURT, fields, (err, results) => {
+			if (err) {
+				console.log(err);
+				res.end();
+			} else {
+				console.log("subtracted 1 from team" + fields[0]);
+				res.end();
+			}
+		});
+	}
 	res.end();
 });
 
