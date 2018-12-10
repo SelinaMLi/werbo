@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import socketIOClient from "socket.io-client";
 
 class Court extends Component {
 	constructor(props) {
@@ -10,7 +11,14 @@ class Court extends Component {
 		};
 	}
 
-	componentWillMount() {
+	componentDidMount() {
+		//join a specific socket channel belonging to the access_code
+		const socket = socketIOClient("http://127.0.0.1:4000");
+		socket.emit("JoinCourt", this.props.match.params.access_code);
+		socket.on("Refresh", () => {
+			this.getCourtInfo();
+		});
+
 		this.setState({ access_code: this.props.match.params.access_code });
 		this.getCourtInfo();
 	}

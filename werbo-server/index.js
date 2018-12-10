@@ -4,9 +4,11 @@ const cors = require("cors");
 const mysql = require("mysql");
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
-const io = require("socket.io");
-const http = require("http").Server(app);
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
 
 const SELECT_ALL_COURTS_QUERY = "SELECT * FROM courts";
 const GET_ALL_CODES = "SELECT access_code FROM courts";
@@ -29,15 +31,11 @@ connection.connect(err => {
 		console.log(err);
 		return err;
 	}
-	console.log("connected!");
+	console.log("connected to mysql database.");
 });
 
-app.use(cors());
-app.use(express.json());
-
+//TODO: return error message if no results is returned
 app.get("/court/:access_code", (req, res) => {
-	console.log(req.params.access_code);
-
 	connection.query(
 		FIND_EXISITNG_COURT,
 		req.params.access_code,
@@ -45,7 +43,6 @@ app.get("/court/:access_code", (req, res) => {
 			if (err) {
 				return res.send(err);
 			} else {
-				console.log(results);
 				return res.json({
 					data: results
 				});
@@ -84,6 +81,9 @@ app.post("/court/update", (req, res) => {
 			}
 		});
 	}
+
+	//let sockets belonging to a certain room know to refresh
+	io.in(req.body.access_code).emit("Refresh");
 	res.end();
 });
 
@@ -94,7 +94,20 @@ app.get("/courts/new", (req, res) => {
 	});
 });
 
-app.listen(4000, () => {
+io.on("connection", socket => {
+	console.log("client connected");
+
+	socket.on("JoinCourt", access_code => {
+		console.log("joined room: " + access_code);
+		socket.join(access_code);
+	});
+
+	socket.on("disconnect", () => {
+		console.log("client disconected");
+	});
+});
+
+server.listen(4000, () => {
 	console.log("werbo server listening on port 4000");
 });
 
