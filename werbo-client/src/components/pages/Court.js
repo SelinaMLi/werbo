@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import socketIOClient from "socket.io-client";
+import { Link } from "react-router-dom";
+
+const socket = socketIOClient("http://127.0.0.1:4000");
 
 class Court extends Component {
 	constructor(props) {
@@ -13,7 +16,6 @@ class Court extends Component {
 
 	componentDidMount() {
 		//join a specific socket channel belonging to the access_code
-		const socket = socketIOClient("http://127.0.0.1:4000");
 		socket.emit("JoinCourt", this.props.match.params.access_code);
 		socket.on("Refresh", () => {
 			this.getCourtInfo();
@@ -21,6 +23,12 @@ class Court extends Component {
 
 		this.setState({ access_code: this.props.match.params.access_code });
 		this.getCourtInfo();
+	}
+
+	componentDidUpdate() {
+		window.onpopstate = e => {
+			this.leaveSocketRoom();
+		};
 	}
 
 	getCourtInfo = () => {
@@ -49,6 +57,10 @@ class Court extends Component {
 		});
 	};
 
+	leaveSocketRoom = () => {
+		socket.emit("LeaveCourt", this.state.access_code);
+	};
+
 	render() {
 		return (
 			<div>
@@ -70,6 +82,15 @@ class Court extends Component {
 					<button onClick={() => this.updateScore(2, "decrease")}>
 						-
 					</button>
+				</div>
+				<div>
+					<Link
+						to={{
+							pathname: "/"
+						}}
+					>
+						<button onClick={this.leaveSocketRoom}>Leave</button>
+					</Link>
 				</div>
 			</div>
 		);

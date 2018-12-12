@@ -15,9 +15,9 @@ const GET_ALL_CODES = "SELECT access_code FROM courts";
 const FIND_EXISITNG_COURT =
 	"SELECT access_code,team1,team2 FROM courts WHERE access_code= ?";
 const INCREMENT_EXISTING_COURT =
-	"UPDATE courts SET team? = team? + 1 WHERE access_code = ?";
+	"UPDATE courts SET team? = team? + 1 WHERE access_code = ? AND team? < 9999";
 const DECREMENT_EXISTING_COURT =
-	"UPDATE courts SET team? = team? - 1 WHERE access_code = ?";
+	"UPDATE courts SET team? = team? - 1 WHERE access_code = ? AND team? > 0";
 
 const connection = mysql.createConnection({
 	host: process.env.DB_HOST,
@@ -56,7 +56,8 @@ app.post("/court/update", (req, res) => {
 	var fields = [
 		req.body.team_number,
 		req.body.team_number,
-		req.body.access_code
+		req.body.access_code,
+		req.body.team_number
 	];
 
 	if (req.body.operation === "increase") {
@@ -65,7 +66,6 @@ app.post("/court/update", (req, res) => {
 				console.log(err);
 				res.end();
 			} else {
-				console.log("added 1 to team" + fields[0]);
 				res.end();
 			}
 		});
@@ -76,7 +76,6 @@ app.post("/court/update", (req, res) => {
 				console.log(err);
 				res.end();
 			} else {
-				console.log("subtracted 1 from team" + fields[0]);
 				res.end();
 			}
 		});
@@ -100,6 +99,11 @@ io.on("connection", socket => {
 	socket.on("JoinCourt", access_code => {
 		console.log("joined room: " + access_code);
 		socket.join(access_code);
+	});
+
+	socket.on("LeaveCourt", access_code => {
+		console.log("left room: " + access_code);
+		socket.leave(access_code);
 	});
 
 	socket.on("disconnect", () => {

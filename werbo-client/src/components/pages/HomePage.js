@@ -13,28 +13,15 @@ class HomePage extends Component {
 	};
 
 	createCourt = () => {
-		// fetch("http://localhost:4000/courts/new").catch(err =>
-		// 	console.error(err)
-		// );
 		fetch("http://localhost:4000/courts/new")
 			.catch(err => console.error(err))
-			.then(
-				response => {
-					console.log(response);
-					response.json();
-				}
-				//this.setState({ code: response });
-			)
-			.then(response => {
-				console.log(response.code);
-				this.setState({ code: response.code });
+			.then(results => {
+				return results.text();
+			})
+			.then(results => {
+				this.setState({ code: results });
 				this.setState({ redirect: true });
 			});
-
-		// fetch("http://localhost:4000/courts")
-		// 	.then(response => response.json())
-		// 	.then(response => this.setState({ courts: response.data }))
-		// 	.catch(err => console.error(err));
 	};
 
 	onSubmit = () => {
@@ -48,8 +35,7 @@ class HomePage extends Component {
 			return (
 				<Redirect
 					to={{
-						pathname: "/court",
-						code: this.state.code
+						pathname: "/join/" + this.state.code
 					}}
 				/>
 			);
