@@ -10,20 +10,21 @@ app.use(express.json());
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-const SELECT_ALL_COURTS_QUERY = "SELECT * FROM courts";
-const GET_ALL_CODES = "SELECT access_code FROM courts";
+const SELECT_ALL_COURTS_QUERY = "SELECT * FROM TB_COURTS";
+const GET_ALL_CODES = "SELECT access_code FROM TB_COURTS";
 const FIND_EXISITNG_COURT =
-	"SELECT access_code,team1,team2 FROM courts WHERE access_code= ?";
+	"SELECT access_code,team1,team2 FROM TB_COURTS WHERE access_code= ?";
 const INCREMENT_EXISTING_COURT =
-	"UPDATE courts SET team? = team? + 1 WHERE access_code = ? AND team? < 9999";
+	"UPDATE TB_COURTS SET team? = team? + 1 WHERE access_code = ? AND team? < 9999";
 const DECREMENT_EXISTING_COURT =
-	"UPDATE courts SET team? = team? - 1 WHERE access_code = ? AND team? > 0";
+	"UPDATE TB_COURTS SET team? = team? - 1 WHERE access_code = ? AND team? > 0";
 
 const connection = mysql.createConnection({
 	host: process.env.DB_HOST,
+	port: process.env.DB_PORT,
 	user: process.env.DB_USER,
 	password: process.env.DB_PASS,
-	database: "werbo"
+	database: process.env.DB_SCHEMA
 });
 
 connection.connect(err => {
@@ -160,7 +161,7 @@ async function generateAccessCode() {
 //TODO- make sure error message returns when database is capped
 function insertCourt(code) {
 	return new Promise((resolve, reject) => {
-		const INSERT_COURTS_QUERY = `INSERT INTO courts (access_code,team1,team2) VALUES ('${code}', 0, 0)`;
+		const INSERT_COURTS_QUERY = `INSERT INTO TB_COURTS (access_code,team1,team2) VALUES ('${code}', 0, 0)`;
 
 		connection.query(INSERT_COURTS_QUERY, (err, results) => {
 			if (err) {
