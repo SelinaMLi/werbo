@@ -57,7 +57,7 @@ class HomePage extends Component {
 								pathname: "/join/" + this.state.code
 							}}
 						>
-							<input type="submit" value="submit" />
+							<input type="submit" value="join court" />
 						</Link>
 					</form>
 				</div>
